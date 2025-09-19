@@ -1,3 +1,4 @@
 .terraform*
 terraform.tfvars
 tmp
+env.sh

@@ -6,5 +6,11 @@ pkgs.mkShell {
     tailwindcss
     tailwindcss-language-server
   ];
+
+  shellHook = ''
+    set -a
+    source env.sh
+    set +a
+  '';
 }
 
