@@ -1,6 +1,7 @@
 package models
 
 type Node struct {
+	ID     string
 	Name   string
 	Status string
 }

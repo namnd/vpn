@@ -2,7 +2,6 @@ package routes
 
 import (
 	"context"
-	"fmt"
 	"log/slog"
 	"net/http"
 
@@ -44,9 +43,15 @@ func Home(c *gin.Context) {
 	var nodes []models.Node
 	for _, v := range result.Reservations {
 		for _, i := range v.Instances {
-			fmt.Println(aws.ToString(i.InstanceId))
+			var name string
+			for _, v := range i.Tags {
+				if *v.Key == "Name" {
+					name = *v.Value
+				}
+			}
 			nodes = append(nodes, models.Node{
-				Name:   aws.ToString(i.InstanceId),
+				ID:     aws.ToString(i.InstanceId),
+				Name:   name,
 				Status: string(i.State.Name),
 			})
 		}
