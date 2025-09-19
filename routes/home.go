@@ -16,51 +16,49 @@ import (
 )
 
 func Home(c *gin.Context) {
-	cfg, err := config.LoadDefaultConfig(context.TODO())
+	country := c.Param("country")
+	if country == "" {
+		country = models.CountriesInOrder[0]
+	}
+
+	region, found := models.CountryRegion[country]
+	if !found {
+		slog.Error("invalid country")
+	}
+
+	cfg, err := config.LoadDefaultConfig(context.TODO(), config.WithRegion(region))
 	if err != nil {
 		slog.Error("failed to load AWS config", "error", err)
 	}
 
+	client := ec2.NewFromConfig(cfg)
 	input := &ec2.DescribeInstancesInput{
 		MaxResults: aws.Int32(5),
 	}
 
-	var countries []models.Country
+	result, err := client.DescribeInstances(context.TODO(), input)
+	if err != nil {
+		slog.Error("failed to list instances", "error", err)
+	}
 
-	for name, region := range models.CountryRegion {
-		regionCfg := cfg.Copy()
-		regionCfg.Region = region
-		regionClient := ec2.NewFromConfig(regionCfg)
-
-		result, err := regionClient.DescribeInstances(context.TODO(), input)
-
-		if err != nil {
-			slog.Error("failed to list instances", "error", err)
+	var nodes []models.Node
+	for _, v := range result.Reservations {
+		for _, i := range v.Instances {
+			fmt.Println(aws.ToString(i.InstanceId))
+			nodes = append(nodes, models.Node{
+				Name:   aws.ToString(i.InstanceId),
+				Status: string(i.State.Name),
+			})
 		}
-
-		var nodes []models.Node
-		for _, v := range result.Reservations {
-			for _, i := range v.Instances {
-				fmt.Println(aws.ToString(i.InstanceId))
-				nodes = append(nodes, models.Node{
-					Name:   aws.ToString(i.InstanceId),
-					Status: string(i.State.Name),
-				})
-			}
-		}
-
-		countries = append(countries, models.Country{
-			Name:  name,
-			Flag:  models.CountryFlags[name],
-			Nodes: nodes,
-		})
-
 	}
 
 	p := gintemplrenderer.New(
 		c.Request.Context(),
 		http.StatusOK,
-		ui.Home(countries),
+		ui.Home(models.Country{
+			Name:  country,
+			Nodes: nodes,
+		}),
 	)
 
 	c.Render(http.StatusOK, p)

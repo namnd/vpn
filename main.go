@@ -17,6 +17,7 @@ func main() {
 	r.StaticFS("/public", http.FS(f))
 
 	r.GET("/", routes.Home)
+	r.GET("/:country", routes.Home)
 	r.POST("/add-new-node", routes.CreateNode)
 
 	r.Run(":8080")
