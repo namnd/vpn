@@ -28,12 +28,12 @@ type UserDataTemplateData struct {
 	TailscaleAuthKey string
 }
 
-type CreateNodeInput struct {
+type NodeFormInput struct {
 	CountryName string `form:"country"`
 }
 
 func CreateNode(c *gin.Context) {
-	var formInput CreateNodeInput
+	var formInput NodeFormInput
 	err := c.ShouldBind(&formInput)
 	if err != nil {
 		slog.Error("invalid input", "err", err)
@@ -60,10 +60,15 @@ func CreateNode(c *gin.Context) {
 		slog.Error("failed to execute userData template", "error", err)
 	}
 
+	imageID, err := getLatestAMI(client)
+	if err != nil {
+		slog.Error("failed to get latest AMI", "error", err)
+	}
+
 	input := &ec2.RunInstancesInput{
 		MaxCount:     aws.Int32(1),
 		MinCount:     aws.Int32(1),
-		ImageId:      aws.String("ami-07dbf7fde6187421a"),
+		ImageId:      aws.String(imageID),
 		InstanceType: types.InstanceType("t4g.small"),
 		UserData:     aws.String(base64.StdEncoding.EncodeToString(userData.Bytes())),
 		TagSpecifications: []types.TagSpecification{
@@ -96,4 +101,39 @@ func randomSuffix(length int) string {
 		result[i] = charset[rng.Intn(len(charset))]
 	}
 	return string(result)
+}
+
+func getLatestAMI(client *ec2.Client) (string, error) {
+	input := &ec2.DescribeImagesInput{
+		Owners: []string{"amazon"},
+		Filters: []types.Filter{
+			{
+				Name:   aws.String("name"),
+				Values: []string{"al2023-ami-2023*"},
+			},
+			{
+				Name:   aws.String("architecture"),
+				Values: []string{"arm64"},
+			},
+		},
+	}
+
+	result, err := client.DescribeImages(context.TODO(), input)
+	if err != nil {
+		return "", fmt.Errorf("failed to get AMI: %v", err)
+	}
+
+	if len(result.Images) == 0 {
+		return "", fmt.Errorf("no matching AMI found")
+	}
+
+	latestAMI := result.Images[0]
+	for _, img := range result.Images[1:] {
+		if img.CreationDate != nil && latestAMI.CreationDate != nil {
+			if *img.CreationDate > *latestAMI.CreationDate {
+				latestAMI = img
+			}
+		}
+	}
+	return *latestAMI.ImageId, nil
 }

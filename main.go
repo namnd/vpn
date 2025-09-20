@@ -18,7 +18,9 @@ func main() {
 
 	r.GET("/", routes.Home)
 	r.GET("/:country", routes.Home)
+
 	r.POST("/add-new-node", routes.CreateNode)
+	r.POST("/start-node/:id", routes.StartNode)
 
 	r.Run(":8080")
 }

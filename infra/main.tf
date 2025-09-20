@@ -15,6 +15,7 @@ data "aws_iam_policy_document" "create_ec2_policy_document" {
   statement {
     actions = [
       "ec2:DescribeInstances",
+      "ec2:StartInstances",
     ]
 
     resources = ["*"]
