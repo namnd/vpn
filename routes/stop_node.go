@@ -37,5 +37,5 @@ func StopNode(c *gin.Context) {
 		slog.Error("failed to stop instance", "error", err)
 	}
 
-	slog.Info("start instance successfully", "region", region, "id", id)
+	slog.Info("stopped instance successfully", "region", region, "id", id)
 }

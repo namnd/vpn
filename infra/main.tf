@@ -20,6 +20,7 @@ data "aws_iam_policy_document" "create_ec2_policy_document" {
       "ec2:RunInstances",
       "ec2:StartInstances",
       "ec2:StopInstances",
+      "ec2:TerminateInstances",
     ]
 
     resources = ["*"]

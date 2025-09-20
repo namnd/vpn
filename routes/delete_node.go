@@ -10,19 +10,15 @@ import (
 	"github.com/namnd/vpn/models"
 )
 
-func StartNode(c *gin.Context) {
+func DeleteNode(c *gin.Context) {
 	id := c.Param("id")
 	if id == "" {
 		slog.Error("invalid instanceID")
 	}
 
-	var formInput NodeFormInput
-	err := c.ShouldBind(&formInput)
-	if err != nil {
-		slog.Error("invalid input", "err", err)
-	}
+	country := c.Query("country")
 
-	region := models.CountryRegion[formInput.CountryName]
+	region := models.CountryRegion[country]
 	cfg, err := config.LoadDefaultConfig(context.TODO(), config.WithRegion(region))
 	if err != nil {
 		slog.Error("failed to load AWS config", "error", err)
@@ -30,12 +26,12 @@ func StartNode(c *gin.Context) {
 
 	client := ec2.NewFromConfig(cfg)
 
-	_, err = client.StartInstances(context.TODO(), &ec2.StartInstancesInput{
+	_, err = client.TerminateInstances(context.TODO(), &ec2.TerminateInstancesInput{
 		InstanceIds: []string{id},
 	})
 	if err != nil {
-		slog.Error("failed to start instance", "error", err)
+		slog.Error("failed to delete instance", "error", err)
 	}
 
-	slog.Info("started instance successfully", "region", region, "id", id)
+	slog.Info("deleted instance successfully", "region", region, "id", id)
 }

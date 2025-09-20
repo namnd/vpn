@@ -20,8 +20,9 @@ func main() {
 	r.GET("/:country", routes.Home)
 
 	r.POST("/add-new-node", routes.CreateNode)
-	r.POST("/start-node/:id", routes.StartNode)
-	r.POST("/stop-node/:id", routes.StopNode)
+	r.PUT("/start-node/:id", routes.StartNode)
+	r.PUT("/stop-node/:id", routes.StopNode)
+	r.DELETE("/delete-node/:id", routes.DeleteNode)
 
 	r.Run(":8080")
 }
