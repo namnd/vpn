@@ -9,6 +9,7 @@ import (
 	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/config"
 	"github.com/aws/aws-sdk-go-v2/service/ec2"
+	"github.com/aws/aws-sdk-go-v2/service/ec2/types"
 	"github.com/gin-gonic/gin"
 	"github.com/namnd/vpn/models"
 	"github.com/namnd/vpn/ui"
@@ -49,11 +50,14 @@ func Home(c *gin.Context) {
 					name = *v.Value
 				}
 			}
-			nodes = append(nodes, models.Node{
-				ID:     aws.ToString(i.InstanceId),
-				Name:   name,
-				Status: string(i.State.Name),
-			})
+			if i.State.Name != types.InstanceStateNameTerminated {
+				nodes = append(nodes, models.Node{
+					ID:           aws.ToString(i.InstanceId),
+					Name:         name,
+					Status:       string(i.State.Name),
+					InstanceType: string(i.InstanceType),
+				})
+			}
 		}
 	}
 

@@ -2,7 +2,6 @@ package routes
 
 import (
 	"context"
-	"fmt"
 	"log/slog"
 
 	"github.com/aws/aws-sdk-go-v2/config"
@@ -31,13 +30,12 @@ func StopNode(c *gin.Context) {
 
 	client := ec2.NewFromConfig(cfg)
 
-	result, err := client.StopInstances(context.TODO(), &ec2.StopInstancesInput{
+	_, err = client.StopInstances(context.TODO(), &ec2.StopInstancesInput{
 		InstanceIds: []string{id},
 	})
 	if err != nil {
 		slog.Error("failed to stop instance", "error", err)
 	}
 
-	fmt.Println(result)
-
+	slog.Info("start instance successfully", "region", region, "id", id)
 }

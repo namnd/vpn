@@ -29,7 +29,8 @@ type UserDataTemplateData struct {
 }
 
 type NodeFormInput struct {
-	CountryName string `form:"country"`
+	CountryName  string `form:"country"`
+	InstanceType string `form:"instance_type"`
 }
 
 func CreateNode(c *gin.Context) {
@@ -69,7 +70,7 @@ func CreateNode(c *gin.Context) {
 		MaxCount:     aws.Int32(1),
 		MinCount:     aws.Int32(1),
 		ImageId:      aws.String(imageID),
-		InstanceType: types.InstanceType("t4g.small"),
+		InstanceType: types.InstanceType(formInput.InstanceType),
 		UserData:     aws.String(base64.StdEncoding.EncodeToString(userData.Bytes())),
 		TagSpecifications: []types.TagSpecification{
 			{
@@ -90,7 +91,7 @@ func CreateNode(c *gin.Context) {
 	}
 
 	instanceID := *result.Instances[0].InstanceId
-	slog.Info("Instance created successfully", "id", instanceID)
+	slog.Info("created instance successfully", "region", region, "id", instanceID)
 }
 
 func randomSuffix(length int) string {
