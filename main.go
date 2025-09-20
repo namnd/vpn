@@ -21,6 +21,7 @@ func main() {
 
 	r.POST("/add-new-node", routes.CreateNode)
 	r.POST("/start-node/:id", routes.StartNode)
+	r.POST("/stop-node/:id", routes.StopNode)
 
 	r.Run(":8080")
 }
