@@ -72,6 +72,7 @@ func CreateNode(c *gin.Context) {
 		ImageId:      aws.String(imageID),
 		InstanceType: types.InstanceType(formInput.InstanceType),
 		UserData:     aws.String(base64.StdEncoding.EncodeToString(userData.Bytes())),
+		KeyName:      aws.String(os.Getenv("KEY_NAME")),
 		TagSpecifications: []types.TagSpecification{
 			{
 				ResourceType: types.ResourceTypeInstance,
