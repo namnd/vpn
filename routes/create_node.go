@@ -72,7 +72,6 @@ func CreateNode(c *gin.Context) {
 		ImageId:      aws.String(imageID),
 		InstanceType: types.InstanceType(formInput.InstanceType),
 		UserData:     aws.String(base64.StdEncoding.EncodeToString(userData.Bytes())),
-		KeyName:      aws.String(os.Getenv("KEY_NAME")),
 		TagSpecifications: []types.TagSpecification{
 			{
 				ResourceType: types.ResourceTypeInstance,
@@ -84,6 +83,11 @@ func CreateNode(c *gin.Context) {
 				},
 			},
 		},
+	}
+
+	keyName := os.Getenv("KEY_NAME")
+	if keyName != "" {
+		input.KeyName = aws.String(keyName)
 	}
 
 	result, err := client.RunInstances(context.TODO(), input)
