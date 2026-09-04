@@ -12,7 +12,7 @@ type Country struct {
 	Nodes []Node
 }
 
-var CountriesInOrder = []string{"NewZealand", "Singapore", "Japan", "India", "US"}
+var CountriesInOrder = []string{"NewZealand", "Singapore", "Japan", "India", "US", "US-CA"}
 
 var CountryRegion = map[string]string{
 	"NewZealand": "ap-southeast-6",
@@ -20,4 +20,5 @@ var CountryRegion = map[string]string{
 	"Japan":      "ap-northeast-1",
 	"India":      "ap-south-1",
 	"US":         "us-east-1",
+	"US-CA":      "us-west-1",
 }
